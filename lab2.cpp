@@ -1,0 +1,584 @@
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include <time.h>
+#include <string>
+#include <algorithm>
+#include <locale.h>
+#include <chrono>
+#include <map>
+using namespace std;
+
+class Flower{
+private:
+    string name;
+    string color;
+    string smell;
+    string region;
+
+public:
+    Flower ()
+    {
+        name = "";
+        color = "";
+        smell = "";
+        region = "";
+    }
+    Flower (string n, string c, string s, string r)
+    {
+        name = n;
+        color = c;
+        smell = s;
+        region = r;
+    }
+    Flower (const Flower& f)
+    {
+        name = f.GetName();
+        color = f.GetColor();
+        smell = f.GetSmell();
+        region = f.GetRegion();
+    }
+    ~Flower () {};
+    string GetName() const
+    {
+        return name;
+    }
+    string GetColor() const
+    {
+        return color;
+    }
+    string GetSmell() const
+    {
+        return smell;
+    }
+    string GetRegion() const
+    {
+        return region;
+    }
+    Flower& operator= (Flower f)
+    {
+        name = f.GetName();
+        color = f.GetColor();
+        smell = f.GetSmell();
+        region = f.GetRegion();
+    }
+    friend ostream& operator<< (ostream &out, const Flower &A);
+};
+ostream& operator<< (ostream &out, const Flower &A){
+    out << A.GetName() << " " << A.GetColor() << " " << A.GetSmell() << " " << A.GetRegion() << " " << endl;
+    return out;
+}
+bool operator> (Flower f1, Flower f2)
+    {
+        if (f1.GetName() > f2.GetName())
+            return true;
+        else if(f1.GetName() == f2.GetName() && f1.GetColor() > f2.GetColor())
+            return true;
+        else if(f1.GetName() == f2.GetName() && f1.GetColor() == f2.GetColor() && f1.GetSmell() > f2.GetSmell())
+            return true;
+        return false;
+    }
+bool operator>= (Flower f1, Flower f2)
+    {
+        if (f1.GetName() >= f2.GetName())
+            return true;
+        else if(f1.GetName() == f2.GetName() && f1.GetColor() >= f2.GetColor())
+            return true;
+        else if(f1.GetName() == f2.GetName() && f1.GetColor() == f2.GetColor() && f1.GetSmell() >= f2.GetSmell())
+            return true;
+        return false;
+    }
+bool operator< (Flower f1, Flower f2)
+    {
+        if (f2 > f1)
+            return true;
+        return false;
+    }
+ bool operator<= (Flower f1, Flower f2)
+    {
+        if (f2 >= f1)
+            return true;
+        return false;
+    }
+long findSmallestPosition(vector<Flower> &A, long startPosition, long vectorLength)
+{
+	long smallestPosition = startPosition;
+
+	for(long i = startPosition; i < vectorLength; i++)
+	{
+		if(A[i] < A[smallestPosition])
+			smallestPosition = i;
+	}
+	return smallestPosition;
+}
+
+void selectionSort(vector<Flower> &A, long vectorLength)
+{
+	for(long i = 0; i < vectorLength; i++)
+	{
+		long smallestPosition = findSmallestPosition(A, i, vectorLength);
+		Flower x = A[smallestPosition];
+		A[smallestPosition] = A[i];
+		A[i] = x;
+	}
+	return;
+}
+int Partition(vector<Flower> &A, int start, int pivot)
+{
+	int i = start;
+	while(i < pivot)
+	{
+		if(A[i] > A[pivot] && i == pivot-1)
+		{
+			Flower x = A[i];
+			A[i] = A[pivot];
+			A[pivot] = x;
+			pivot--;
+		}
+
+		else if(A[i] > A[pivot])
+		{
+			Flower x = A[pivot - 1];
+			A[pivot - 1] = A[pivot];
+			A[pivot] = x;
+
+			x = A[i];
+			A[i] = A[pivot];
+			A[pivot] = x;
+			pivot--;
+		}
+
+		else i++;
+	}
+	return pivot;
+}
+
+void quickSort(vector<Flower> &A, int start, int End)
+{
+	if(start < End)
+	{
+		int pivot = Partition(A, start, End);
+
+		quickSort(A, start, pivot - 1);
+		quickSort(A, pivot + 1, End);
+	}
+}
+
+void heapify(vector<Flower> &A, long vectorLength, long root)
+{
+	long largest = root;
+	long l = 2*root + 1;
+	long r = 2*root + 2;
+
+	if (l < vectorLength && A[l] > A[largest])
+		largest = l;
+
+	if (r < vectorLength && A[r] > A[largest])
+		largest = r;
+
+	if (largest != root)
+	{
+		Flower x = A[root];
+		A[root] = A [largest];
+		A[largest] = x;
+		heapify(A, vectorLength, largest);
+	}
+}
+
+void heapSort(vector <Flower> &A, long vectorLength)
+{
+	for(long i = vectorLength / 2 - 1; i >= 0; i--)
+		heapify(A, vectorLength, i);
+
+	for(long i = vectorLength - 1; i >= 0; i--)
+	{
+		Flower x = A[i];
+		A[i] = A[0];
+		A[0] = x;
+		heapify(A, i, 0);
+	}
+}
+
+int linearSearch(vector <Flower> &A, long n, string key){
+    for (long i = 0; i < n; i++)
+        if (A[i].GetName() == key)
+            return i;
+    return -1;
+}
+
+int binarySearch(vector <Flower> A, long n, string key){
+
+    long l = 0, r = n, m;
+
+    while (l <= r){
+        m = (l + r) / 2;
+
+        if (A[m].GetName() == key)
+            return m;
+        if (A[m].GetName() > key)
+            r = m - 1;
+        else
+            l = m + 1;
+    }
+
+    return -1;
+}
+int main()
+{
+    long vibor;
+    cout << "Search:\n1. lin\n2. sort then bin \n3. bin and sort\n4. multimap\n";
+    cin >> vibor;
+    vector<Flower> f1,f2,f3,f4,f5,f6,f7;
+    ifstream fin100("f100.txt"),
+             fin500("f500.txt"),
+             fin1k("f1000.txt"),
+             fin10k("f10000.txt"),
+             fin20k("f20000.txt"),
+             fin50k("f50000.txt"),
+            fin100k("f100000.txt");
+    for (long i = 0; i < 100; i++)
+    {
+        string a,b,c,d;
+        fin100 >> a >> b >> c >> d;
+        Flower x(a,b,c,d);
+        f1.push_back(x);
+    }
+    for (long i = 0; i < 500; i++)
+    {
+        string a,b,c,d;
+        fin500 >> a >> b >> c >> d;
+        Flower x(a,b,c,d);
+        f2.push_back(x);
+    }
+    for (long i = 0; i < 1000; i++)
+    {
+        string a,b,c,d;
+        fin1k >> a >> b >> c >> d;
+        Flower x(a,b,c,d);
+        f3.push_back(x);
+    }
+    for (long i = 0; i < 10000; i++)
+    {
+        string a,b,c,d;
+        fin10k >> a >> b >> c >> d;
+        Flower x(a,b,c,d);
+        f4.push_back(x);
+    }
+    for (long i = 0; i < 20000; i++)
+    {
+        string a,b,c,d;
+        fin20k >> a >> b >> c >> d;
+        Flower x(a,b,c,d);
+        f5.push_back(x);
+    }
+    for (long i = 0; i < 50000; i++)
+    {
+        string a,b,c,d;
+        fin50k >> a >> b >> c >> d;
+        Flower x(a,b,c,d);
+        f6.push_back(x);
+    }
+    for (long i = 0; i < 100000; i++)
+    {
+        string a,b,c,d;
+        fin100k >> a >> b >> c >> d;
+        Flower x(a,b,c,d);
+        f7.push_back(x);
+    }
+    if (vibor == 1)
+    {
+        int tmp;
+
+        cout << "Viborka razmerom  100:\t";
+        auto start_t = chrono::steady_clock::now();
+        tmp = linearSearch(f1, 100, "YPV");
+        auto end_t = chrono::steady_clock::now();
+        auto elapsed_ms = std::chrono::duration_cast<std::chrono::nanoseconds>(end_t - start_t);
+        cout << elapsed_ms.count() << " nanoseconds\n";
+
+        cout << "Viborka razmerom  500:\t";
+        start_t = chrono::steady_clock::now();
+        tmp = linearSearch(f2, 500, "UKF");
+        end_t = chrono::steady_clock::now();
+        elapsed_ms = std::chrono::duration_cast<std::chrono::nanoseconds>(end_t - start_t);
+        cout << elapsed_ms.count() << " nanoseconds\n";
+
+        cout << "Viborka razmerom  1000:\t";
+        start_t = chrono::steady_clock::now();
+        tmp = linearSearch(f3, 1000, "LZX");
+        end_t = chrono::steady_clock::now();
+        elapsed_ms = std::chrono::duration_cast<std::chrono::nanoseconds>(end_t - start_t);
+        cout << elapsed_ms.count() << " nanoseconds\n";
+
+        cout << "Viborka razmerom  10000:\t";
+        start_t = chrono::steady_clock::now();
+        tmp = linearSearch(f4, 10000, "WJB");
+        end_t = chrono::steady_clock::now();
+        elapsed_ms = std::chrono::duration_cast<std::chrono::nanoseconds>(end_t - start_t);
+        cout << elapsed_ms.count() << " nanoseconds\n";
+
+        cout << "Viborka razmerom  20000:\t";
+        start_t = chrono::steady_clock::now();
+        tmp = linearSearch(f5, 20000, "WYV");
+        end_t = chrono::steady_clock::now();
+        elapsed_ms = std::chrono::duration_cast<std::chrono::nanoseconds>(end_t - start_t);
+        cout << elapsed_ms.count() << " nanoseconds\n";
+
+        cout << "Viborka razmerom  50000:\t";
+        start_t = chrono::steady_clock::now();
+        tmp = linearSearch(f6, 50000, "XOD");
+        end_t = chrono::steady_clock::now();
+        elapsed_ms = std::chrono::duration_cast<std::chrono::nanoseconds>(end_t - start_t);
+        cout << elapsed_ms.count() << " nanoseconds\n";
+
+        cout << "Viborka razmerom  100000:\t";
+        start_t = chrono::steady_clock::now();
+        tmp = linearSearch(f7, 100000, "BEC");
+        end_t = chrono::steady_clock::now();
+        elapsed_ms = std::chrono::duration_cast<std::chrono::nanoseconds>(end_t - start_t);
+        cout << elapsed_ms.count() << " nanoseconds\n";
+    }
+    else if (vibor == 2)
+    {
+        int tmp;
+        heapSort(f1, 100);
+        heapSort(f2, 500);
+        heapSort(f3, 1000);
+        heapSort(f4, 10000);
+        heapSort(f5, 20000);
+        heapSort(f6, 50000);
+        heapSort(f7, 100000);
+
+        cout << "Viborka razmerom  100:\t";
+        auto start_t = chrono::steady_clock::now();
+        tmp = binarySearch(f1, 100, "YPV");
+        auto end_t = chrono::steady_clock::now();
+        auto elapsed_ms = std::chrono::duration_cast<std::chrono::nanoseconds>(end_t - start_t);
+        cout << elapsed_ms.count() << " nanoseconds\n";
+
+        cout << "Viborka razmerom  500:\t";
+        start_t = chrono::steady_clock::now();
+        tmp = binarySearch(f2, 500, "UKF");
+        end_t = chrono::steady_clock::now();
+        elapsed_ms = std::chrono::duration_cast<std::chrono::nanoseconds>(end_t - start_t);
+        cout << elapsed_ms.count() << " nanoseconds\n";
+
+        cout << "Viborka razmerom  1000:\t";
+        start_t = chrono::steady_clock::now();
+        tmp = binarySearch(f3, 1000, "LZX");
+        end_t = chrono::steady_clock::now();
+        elapsed_ms = std::chrono::duration_cast<std::chrono::nanoseconds>(end_t - start_t);
+        cout << elapsed_ms.count() << " nanoseconds\n";
+
+        cout << "Viborka razmerom  10000:\t";
+        start_t = chrono::steady_clock::now();
+        tmp = binarySearch(f4, 10000, "WJB");
+        end_t = chrono::steady_clock::now();
+        elapsed_ms = std::chrono::duration_cast<std::chrono::nanoseconds>(end_t - start_t);
+        cout << elapsed_ms.count() << " nanoseconds\n";
+
+        cout << "Viborka razmerom  20000:\t";
+        start_t = chrono::steady_clock::now();
+        tmp = binarySearch(f5, 20000, "WYV");
+        end_t = chrono::steady_clock::now();
+        elapsed_ms = std::chrono::duration_cast<std::chrono::nanoseconds>(end_t - start_t);
+        cout << elapsed_ms.count() << " nanoseconds\n";
+
+        cout << "Viborka razmerom  50000:\t";
+        start_t = chrono::steady_clock::now();
+        tmp = binarySearch(f6, 50000, "XOD");
+        end_t = chrono::steady_clock::now();
+        elapsed_ms = std::chrono::duration_cast<std::chrono::nanoseconds>(end_t - start_t);
+        cout << elapsed_ms.count() << " nanoseconds\n";
+
+        cout << "Viborka razmerom  100000:\t";
+        start_t = chrono::steady_clock::now();
+        tmp = binarySearch(f7, 100000, "BEC");
+        end_t = chrono::steady_clock::now();
+        elapsed_ms = std::chrono::duration_cast<std::chrono::nanoseconds>(end_t - start_t);
+        cout << elapsed_ms.count() << " nanoseconds\n";
+    }
+    else if (vibor == 3)
+    {
+        int tmp;
+        cout << "Viborka razmerom  100:\t";
+        auto start_t = chrono::steady_clock::now();
+        heapSort(f1, 100);
+        tmp = binarySearch(f1, 100, "YPV");
+        auto end_t = chrono::steady_clock::now();
+        auto elapsed_ms = std::chrono::duration_cast<std::chrono::nanoseconds>(end_t - start_t);
+        cout << elapsed_ms.count() << " nanoseconds\n";
+
+        cout << "Viborka razmerom  500:\t";
+        start_t = chrono::steady_clock::now();
+        heapSort(f2, 500);
+        tmp = binarySearch(f2, 500, "UKF");
+        end_t = chrono::steady_clock::now();
+        elapsed_ms = std::chrono::duration_cast<std::chrono::nanoseconds>(end_t - start_t);
+        cout << elapsed_ms.count() << " nanoseconds\n";
+
+        cout << "Viborka razmerom  1000:\t";
+        start_t = chrono::steady_clock::now();
+        heapSort(f3, 1000);
+        tmp = binarySearch(f3, 1000, "LZX");
+        end_t = chrono::steady_clock::now();
+        elapsed_ms = std::chrono::duration_cast<std::chrono::nanoseconds>(end_t - start_t);
+        cout << elapsed_ms.count() << " nanoseconds\n";
+
+        cout << "Viborka razmerom  10000:\t";
+        start_t = chrono::steady_clock::now();
+        heapSort(f4, 10000);
+        tmp = binarySearch(f4, 10000, "WJB");
+        end_t = chrono::steady_clock::now();
+        elapsed_ms = std::chrono::duration_cast<std::chrono::nanoseconds>(end_t - start_t);
+        cout << elapsed_ms.count() << " nanoseconds\n";
+
+        cout << "Viborka razmerom  20000:\t";
+        start_t = chrono::steady_clock::now();
+        heapSort(f5, 20000);
+        tmp = binarySearch(f5, 20000, "WYV");
+        end_t = chrono::steady_clock::now();
+        elapsed_ms = std::chrono::duration_cast<std::chrono::nanoseconds>(end_t - start_t);
+        cout << elapsed_ms.count() << " nanoseconds\n";
+
+        cout << "Viborka razmerom  50000:\t";
+        start_t = chrono::steady_clock::now();
+        heapSort(f6, 50000);
+        tmp = binarySearch(f6, 50000, "XOD");
+        end_t = chrono::steady_clock::now();
+        elapsed_ms = std::chrono::duration_cast<std::chrono::nanoseconds>(end_t - start_t);
+        cout << elapsed_ms.count() << " nanoseconds\n";
+
+        cout << "Viborka razmerom  100000:\t";
+        start_t = chrono::steady_clock::now();
+        heapSort(f7, 100000);
+        tmp = binarySearch(f7, 100000, "BEC");
+        end_t = chrono::steady_clock::now();
+        elapsed_ms = std::chrono::duration_cast<std::chrono::nanoseconds>(end_t - start_t);
+        cout << elapsed_ms.count() << " nanoseconds\n";
+    }
+    else if (vibor == 4){
+        multimap <string, Flower> map100 = {}, map500 = {},map1000 = {}, map10000 = {}, map20000 = {}, map50000 = {}, map100000 = {};
+
+        for (int i = 0; i < 100; i++)
+            map100.insert(pair <string, Flower>(f1[i].GetName(), f1[i]));
+
+        for (int i = 0; i < 500; i++)
+            map500.insert(pair <string, Flower>(f2[i].GetName(), f2[i]));
+
+        for (int i = 0; i < 1000; i++)
+            map1000.insert(pair <string, Flower>(f3[i].GetName(), f3[i]));
+
+        for (int i = 0; i < 10000; i++)
+            map10000.insert(pair <string, Flower>(f4[i].GetName(), f4[i]));
+
+        for (int i = 0; i < 20000; i++)
+            map20000.insert(pair <string, Flower>(f5[i].GetName(), f5[i]));
+
+        for (int i = 0; i < 50000; i++)
+            map50000.insert(pair <string, Flower>(f6[i].GetName(), f6[i]));
+
+        for (int i = 0; i < 100000; i++)
+            map100000.insert(pair <string, Flower>(f7[i].GetName(), f7[i]));
+
+        cout << "Viborka razmerom  100:\t";
+        auto start_t = chrono::steady_clock::now();
+        auto tmp = map100.find("YPV");
+        auto end_t = chrono::steady_clock::now();
+        auto elapsed_ms = std::chrono::duration_cast<std::chrono::nanoseconds>(end_t - start_t);
+        cout << elapsed_ms.count() << " nanoseconds\n";
+
+        cout << "Viborka razmerom  500:\t";
+        start_t = chrono::steady_clock::now();
+        tmp = map500.find("UKF");
+        end_t = chrono::steady_clock::now();
+        elapsed_ms = std::chrono::duration_cast<std::chrono::nanoseconds>(end_t - start_t);
+        cout << elapsed_ms.count() << " nanoseconds\n";
+
+        cout << "Viborka razmerom  1000:\t";
+        start_t = chrono::steady_clock::now();
+        tmp = map1000.find("LZX");
+        end_t = chrono::steady_clock::now();
+        elapsed_ms = std::chrono::duration_cast<std::chrono::nanoseconds>(end_t - start_t);
+        cout << elapsed_ms.count() << " nanoseconds\n";
+
+        cout << "Viborka razmerom  10000:\t";
+        start_t = chrono::steady_clock::now();
+        tmp = map10000.find("WJB");
+        end_t = chrono::steady_clock::now();
+        elapsed_ms = std::chrono::duration_cast<std::chrono::nanoseconds>(end_t - start_t);
+        cout << elapsed_ms.count() << " nanoseconds\n";
+
+        cout << "Viborka razmerom  20000:\t";
+        start_t = chrono::steady_clock::now();
+        tmp = map20000.find("WYV");
+        end_t = chrono::steady_clock::now();
+        elapsed_ms = std::chrono::duration_cast<std::chrono::nanoseconds>(end_t - start_t);
+        cout << elapsed_ms.count() << " nanoseconds\n";
+
+        cout << "Viborka razmerom  50000:\t";
+        start_t = chrono::steady_clock::now();
+        tmp = map50000.find("XOD");
+        end_t = chrono::steady_clock::now();
+        elapsed_ms = std::chrono::duration_cast<std::chrono::nanoseconds>(end_t - start_t);
+        cout << elapsed_ms.count() << " nanoseconds\n";
+
+        cout << "Viborka razmerom  100000:\t";
+        start_t = chrono::steady_clock::now();
+        tmp = map100000.find("BEC");
+        end_t = chrono::steady_clock::now();
+        elapsed_ms = std::chrono::duration_cast<std::chrono::nanoseconds>(end_t - start_t);
+        cout << elapsed_ms.count() << " nanoseconds\n";
+    }
+
+    fin100.close();
+    fin500.close();
+    fin1k.close();
+    fin10k.close();
+    fin20k.close();
+    fin50k.close();
+    fin100k.close();
+    ofstream o100("out100.txt"),
+             o500("out500.txt"),
+             o1k("out1000.txt"),
+             o10k("out10000.txt"),
+             o20k("out20000.txt"),
+             o50k("out50000.txt"),
+             o100k("out100000.txt");
+    for (long i = 0; i < 100; i++)
+    {
+        o100 << f1[i];
+    }
+    for (long i = 0; i < 500; i++)
+    {
+        o500 << f2[i];
+    }
+    for (long i = 0; i < 1000; i++)
+    {
+        o1k << f3[i];
+    }
+    for (long i = 0; i < 10000; i++)
+    {
+        o10k << f4[i];
+    }
+    for (long i = 0; i < 20000; i++)
+    {
+        o20k << f5[i];
+    }
+    for (long i = 0; i < 50000; i++)
+    {
+        o50k << f6[i];
+    }
+    for (long i = 0; i < 100000; i++)
+    {
+        o100k << f7[i];
+    }
+    o100.close();
+    o500.close();
+    o1k.close();
+    o10k.close();
+    o20k.close();
+    o50k.close();
+    o100k.close();
+
+}
